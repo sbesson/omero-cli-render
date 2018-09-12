@@ -9,6 +9,7 @@ services:
   - docker
 
 before_install:
+  - pip install -U setuptools
   - git clone --recurse-submodules git://github.com/openmicroscopy/omero-test-infra .omero
 
 script:
