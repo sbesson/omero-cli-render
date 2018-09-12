@@ -18,6 +18,6 @@ deploy:
   provider: pypi
   user: ${CI_DEPLOY_USER}
   password: ${CI_DEPLOY_PASS}
-  server: https://test.pypi.org/legacy/
+  server: https://test.pypi.org/pypi/
   on:
     tags: true
