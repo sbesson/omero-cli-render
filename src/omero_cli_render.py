@@ -610,7 +610,7 @@ class RenderControl(BaseControl):
                 tb.setPixelsId(long(pixid), ctx)
                 if not direct:
                     tb.getThumbnailByLongestSide(rint(96), ctx)
-                elif:
+                else:
                     tb.getThumbnailByLongestSideDirect(rint(96), ctx)
             finally:
                 tb.close()
