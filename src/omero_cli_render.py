@@ -569,7 +569,7 @@ class RenderControl(BaseControl):
             self.test_per_pixel(
                 self.client, img.getPrimaryPixels().id, args.force, args.thumb)
 
-    def test_per_pixel(self, client, pixid, force, thumb):
+    def test_per_pixel(self, client, pixid, force, thumb, direct=True):
         ctx = {'omero.group': '-1'}
         fail = {"omero.pixeldata.fail_if_missing": "true"}
         fail.update(ctx)
@@ -608,7 +608,10 @@ class RenderControl(BaseControl):
             tb = client.sf.createThumbnailStore()
             try:
                 tb.setPixelsId(long(pixid), ctx)
-                tb.getThumbnailByLongestSide(rint(96), ctx)
+                if not direct:
+                    tb.getThumbnailByLongestSide(rint(96), ctx)
+                elif:
+                    tb.getThumbnailByLongestSideDirect(rint(96), ctx)
             finally:
                 tb.close()
 
