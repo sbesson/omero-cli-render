@@ -112,25 +112,25 @@ class TestRender(CLITest):
 
     def get_render_def(self, sizec=4, greyscale=None):
         channels = {}
-        channels[1] = {
+        channels[0] = {
             'label': self.uuid(),
             'color': '123456',
             'min': 11,
             'max': 22,
         }
-        channels[2] = {
+        channels[1] = {
             'label': self.uuid(),
             'color': '789ABC',
             'min': 33,
             'max': 44,
         }
-        channels[3] = {
+        channels[2] = {
             'label': self.uuid(),
             'color': 'DEF012',
             'min': 55,
             'max': 66,
         }
-        channels[4] = {
+        channels[3] = {
             'label': self.uuid(),
             'color': '345678',
             'min': 77,
@@ -138,7 +138,7 @@ class TestRender(CLITest):
         }
 
         for k in xrange(sizec, 4):
-            del channels[k + 1]
+            del channels[k]
         d = {'channels': channels}
 
         if greyscale is not None:
@@ -215,7 +215,7 @@ class TestRender(CLITest):
             channels = img.getChannels()
             assert len(channels) == sizec
             for c in xrange(len(channels)):
-                self.assert_channel_rdef(channels[c], rd['channels'][c + 1])
+                self.assert_channel_rdef(channels[c], rd['channels'][c])
             self.assert_image_rmodel(img, expected_greyscale)
             # img._closeRE()
         # assert not gw._assert_unregistered("testSet")
@@ -249,7 +249,7 @@ class TestRender(CLITest):
             channels = img.getChannels()
             assert len(channels) == sizec
             for c in xrange(len(channels)):
-                self.assert_channel_rdef(channels[c], rd['channels'][c + 1])
+                self.assert_channel_rdef(channels[c], rd['channels'][c])
             self.assert_image_rmodel(img, expected_greyscale)
             # img._closeRE()
         # assert not gw._assert_unregistered("testEditSingleC")
