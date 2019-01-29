@@ -227,17 +227,14 @@ class TestRender(CLITest):
     @pytest.mark.parametrize('style', ['json', 'yaml'])
     def test_info_style(self, style):
         self.create_image()
-        target = self.imageid
-        self.args += ["info", target]
-        self.args += ['--style', style]
+        self.args += ["info", self.imageid, "--style", style]
         self.cli.invoke(self.args, strict=True)
 
     @pytest.mark.parametrize('target_name', sorted(SUPPORTED))
     def test_copy(self, target_name, tmpdir):
         self.create_image(target_name=target_name)
         target = getattr(self, target_name)
-        rd = self.get_render_def(sizec=sizec, greyscale=greyscale,
-                                 version=version)
+        rd = self.get_render_def()
         rdfile = tmpdir.join('render-copy.json')
         self.args += ["set", self.source, str(rdfile)]
         self.args += ["copy", self.source, target]
