@@ -236,8 +236,13 @@ class TestRender(CLITest):
     def test_copy(self, target_name, tmpdir):
         self.create_image(target_name=target_name)
         target = getattr(self, target_name)
+        rd = self.get_render_def(sizec=sizec, greyscale=greyscale,
+                                 version=version)
+        rdfile = tmpdir.join('render-copy.json')
+        self.args += ["set", self.source, str(rdfile)]
         self.args += ["copy", self.source, target]
         self.cli.invoke(self.args, strict=True)
+        self.assert_target_rdef(target, rd)
 
     @pytest.mark.parametrize('sizec', [1, 2, 4])
     @pytest.mark.parametrize('greyscale', [None, True, False])
@@ -246,7 +251,7 @@ class TestRender(CLITest):
         self.create_image(sizec=sizec)
         rd = self.get_render_def(sizec=sizec, greyscale=greyscale,
                                  version=version)
-        rdfile = tmpdir.join('render-test.json')
+        rdfile = tmpdir.join('render_set.json')
         # Should work with json and yaml, but yaml is an optional dependency
         rdfile.write(json.dumps(rd))
         self.args += ["set", self.idonly, str(rdfile)]
