@@ -246,17 +246,31 @@ class TestRender(CLITest):
         self.args += ["info", target]
         self.cli.invoke(self.args, strict=True)
 
+    @pytest.mark.parametrize('lut', [True, False])
     @pytest.mark.parametrize('style', ['json', 'yaml'])
     def test_info_style(self, style, capsys):
         self.create_image()
         target = self.imageid
-        self.args += ["info", target]
-        self.args += ['--style', style]
+        self.args += ["info", target, '--style', style]
         self.cli.invoke(self.args, strict=True)
         out, err = capsys.readouterr()
 
         dir_name = os.path.dirname(os.path.abspath(__file__))
-        expected_file = {'json': 'info.json', 'yaml': 'info.yml'}
+        expected_file = {'json': 'default.json', 'yaml': 'default.yml'}
+        with open(os.path.join(dir_name, expected_file[style]), 'r') as f:
+            assert out == f.read()
+
+        gw = BlitzGateway(client_obj=self.client)
+        img = gw.getObject('Image', target)
+        img._prepareRenderingEngine()
+        img._re.setChannelLookupTable(0, 'fire.lut')
+
+        self.args += ["info", target, '--style', style]
+        self.cli.invoke(self.args, strict=True)
+        out, err = capsys.readouterr()
+
+        dir_name = os.path.dirname(os.path.abspath(__file__))
+        expected_file = {'json': 'lut.json', 'yaml': 'lut.yml'}
         with open(os.path.join(dir_name, expected_file[style]), 'r') as f:
             assert out == f.read()
 
