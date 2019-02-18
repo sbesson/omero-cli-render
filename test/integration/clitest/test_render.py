@@ -142,7 +142,7 @@ class TestRender(CLITest):
         }
         channels[4] = {
             'label': self.uuid(),
-            'color': '345678',
+            'color': 'fire.lut',
         }
 
         if windows:
@@ -205,7 +205,11 @@ class TestRender(CLITest):
 
     def assert_channel_rdef(self, channel, rdef, version=2):
         assert channel.getLabel() == rdef['label']
-        assert channel.getColor().getHtml() == rdef['color']
+        if rdef['color'].endswith('.lut'):
+            assert channel.getLut() == rdef['color']
+        else:
+            assert channel.getLut() is None
+            assert channel.getColor().getHtml() == rdef['color']
         start = 'start' if version > 1 else 'min'
         end = 'end' if version > 1 else 'max'
         assert channel.getWindowStart() == rdef.get(start, 0)
