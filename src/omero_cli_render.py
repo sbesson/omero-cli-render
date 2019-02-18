@@ -84,7 +84,8 @@ SET_HELP = """Set rendering settings
     channels:                       Required
       <int>:                        Channel index, 1-based
         active: <bool>              Active channel
-        color: <string>             Channel color as HTML RGB triplet
+        color: <string>             Channel color as HTML RGB triplet or
+                                    LUT string ending with .lut
         label: <string>             Channel name
         start: <float>              Start of the rendering window, optional
         end: <float>                End of the rendering window, optional
@@ -104,7 +105,7 @@ SET_HELP = """Set rendering settings
         end: 248.0
         active: True
       2:
-        color: "00FF00"
+        color: "fire.lut"
       ...
     z: 5
     t: 1
