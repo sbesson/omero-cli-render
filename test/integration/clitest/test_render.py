@@ -246,7 +246,6 @@ class TestRender(CLITest):
         self.args += ["info", target]
         self.cli.invoke(self.args, strict=True)
 
-    @pytest.mark.parametrize('lut', [True, False])
     @pytest.mark.parametrize('style', ['json', 'yaml'])
     def test_info_style(self, style, capsys):
         self.create_image()

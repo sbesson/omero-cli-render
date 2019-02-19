@@ -179,15 +179,17 @@ class ChannelObject(object):
 
     def __init__(self, channel, version=SPEC_VERSION):
         self.version = version
-        try:
-            self.init_from_channel(channel)
-        except AttributeError:
+        if isinstance(channel, dict):
             self.init_from_dict(channel)
+        else:
+            self.init_from_channel(channel)
 
     def init_from_channel(self, channel):
         self.emWave = channel.getEmissionWave()
         self.label = channel.getLabel()
-        self.color = channel.getColor()
+        self.color = channel.getLut()
+        if self.color is None:
+            self.color = channel.getColor().getHtml()
         try:
             self.min = channel.getWindowMin()
             self.max = channel.getWindowMax()
@@ -215,14 +217,10 @@ class ChannelObject(object):
         self.active = bool(d.get('active', True))
 
     def __str__(self):
-        try:
-            color = self.color.getHtml()
-        except AttributeError:
-            color = self.color
         sb = ""
         sb += ",".join([
             "active=%s" % self.active,
-            "color=%s" % color,
+            "color=%s" % self.color,
             "label=%s" % self.label,
             "min=%s" % self.min,
             "start=%s" % self.start,
@@ -235,17 +233,13 @@ class ChannelObject(object):
         """
         Return a dict of fields that are recognised by `render set`
         """
-        try:
-            color = self.color.getHtml()
-        except AttributeError:
-            color = self.color
 
         label = None
         if self.label is not None:
             label = str(self.label)
         d = {}
         _set_if_not_none(d, 'label', label)
-        _set_if_not_none(d, 'color', color)
+        _set_if_not_none(d, 'color', self.color)
         _set_if_not_none(d, 'min', self.min)
         _set_if_not_none(d, 'max', self.max)
         _set_if_not_none(d, 'start', self.start)
