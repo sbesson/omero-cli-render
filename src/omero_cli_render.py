@@ -189,7 +189,10 @@ class ChannelObject(object):
         self.label = channel.getLabel()
         self.color = channel.getLut()
         if self.color is None:
-            self.color = channel.getColor().getHtml()
+            try:
+                self.color = channel.getColor().getHtml()
+            except AttributeError:
+                self.color = channel.getColor()
         try:
             self.min = channel.getWindowMin()
             self.max = channel.getWindowMax()
