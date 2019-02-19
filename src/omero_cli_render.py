@@ -513,10 +513,10 @@ class RenderControl(BaseControl):
             self._update_channel_names(self, iids, namedict)
 
     def _update_channel_names(self, gateway, iids, namedict):
-            counts = gateway.setChannelNames("Image", iids, namedict)
-            if counts:
-                self.ctx.dbg("Updated channel names for %d/%d images" % (
-                    counts['updateCount'], counts['imageCount']))
+        counts = gateway.setChannelNames("Image", iids, namedict)
+        if counts:
+            self.ctx.dbg("Updated channel names for %d/%d images" % (
+                counts['updateCount'], counts['imageCount']))
 
     def _generate_thumbs(self, images):
         for img in images:
