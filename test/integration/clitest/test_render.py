@@ -262,13 +262,10 @@ class TestRender(CLITest):
         gw = BlitzGateway(client_obj=self.client)
         img = gw.getObject('Image', target)
         img._prepareRenderingEngine()
-        # img._re.setChannelLookupTable(0, 'fire.lut')
+        img._re.setChannelLookupTable(0, 'fire.lut')
 
-        self.args += ["info", target, '--style', style]
         self.cli.invoke(self.args, strict=True)
         out, err = capsys.readouterr()
-
-        dir_name = os.path.dirname(os.path.abspath(__file__))
         expected_file = {'json': 'lut.json', 'yaml': 'lut.yml'}
         with open(os.path.join(dir_name, expected_file[style]), 'r') as f:
             assert out == f.read()
