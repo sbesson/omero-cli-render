@@ -179,10 +179,10 @@ class ChannelObject(object):
 
     def __init__(self, channel, version=SPEC_VERSION):
         self.version = version
-        if isinstance(channel, dict):
-            self.init_from_dict(channel)
-        else:
+        try:
             self.init_from_channel(channel)
+        except AttributeError:
+            self.init_from_dict(channel)
 
     def init_from_channel(self, channel):
         self.emWave = channel.getEmissionWave()
