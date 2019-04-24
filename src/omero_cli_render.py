@@ -187,12 +187,15 @@ class ChannelObject(object):
     def init_from_channel(self, channel):
         self.emWave = channel.getEmissionWave()
         self.label = channel.getLabel()
-        self.color = channel.getLut()
-        if self.color is None:
+        lut = channel.getLut()
+        if lut is None:
+            color = channel.getColor()
             try:
-                self.color = channel.getColor().getHtml()
+                self.color = color.getHtml()
             except AttributeError:
-                self.color = channel.getColor()
+                self.color = color
+        else:
+            self.color = lut
         try:
             self.min = channel.getWindowMin()
             self.max = channel.getWindowMax()

@@ -262,7 +262,7 @@ class TestRender(CLITest):
         gw = BlitzGateway(client_obj=self.client)
         img = gw.getObject('Image', target)
         img._prepareRenderingEngine()
-        img._re.setChannelLookupTable(0, 'fire.lut')
+        # img._re.setChannelLookupTable(0, 'fire.lut')
 
         self.args += ["info", target, '--style', style]
         self.cli.invoke(self.args, strict=True)
