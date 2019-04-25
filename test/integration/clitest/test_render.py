@@ -259,9 +259,9 @@ class TestRender(CLITest):
         with open(os.path.join(dir_name, expected_file[style]), 'r') as f:
             assert out == f.read()
         #
-        # gw = BlitzGateway(client_obj=self.client)
-        # img = gw.getObject('Image', target)
-        # img._prepareRenderingEngine()
+        gw = BlitzGateway(client_obj=self.client)
+        img = gw.getObject('Image', target)
+        img._prepareRenderingEngine()
         # img._re.setChannelLookupTable(0, 'fire.lut')
         #
         # self.cli.invoke(self.args, strict=True)
