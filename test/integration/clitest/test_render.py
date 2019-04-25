@@ -247,7 +247,7 @@ class TestRender(CLITest):
         self.cli.invoke(self.args, strict=True)
 
     @pytest.mark.parametrize('style', ['json', 'yaml'])
-    def xtest_info_style(self, style, capsys):
+    def test_info_style(self, style, capsys):
         self.create_image()
         target = self.imageid
         self.args += ["info", target, '--style', style]
@@ -258,17 +258,17 @@ class TestRender(CLITest):
         expected_file = {'json': 'default.json', 'yaml': 'default.yml'}
         with open(os.path.join(dir_name, expected_file[style]), 'r') as f:
             assert out == f.read()
-
-        gw = BlitzGateway(client_obj=self.client)
-        img = gw.getObject('Image', target)
-        img._prepareRenderingEngine()
-        img._re.setChannelLookupTable(0, 'fire.lut')
-
-        self.cli.invoke(self.args, strict=True)
-        out, err = capsys.readouterr()
-        expected_file = {'json': 'lut.json', 'yaml': 'lut.yml'}
-        with open(os.path.join(dir_name, expected_file[style]), 'r') as f:
-            assert out == f.read()
+        #
+        # gw = BlitzGateway(client_obj=self.client)
+        # img = gw.getObject('Image', target)
+        # img._prepareRenderingEngine()
+        # img._re.setChannelLookupTable(0, 'fire.lut')
+        #
+        # self.cli.invoke(self.args, strict=True)
+        # out, err = capsys.readouterr()
+        # expected_file = {'json': 'lut.json', 'yaml': 'lut.yml'}
+        # with open(os.path.join(dir_name, expected_file[style]), 'r') as f:
+        #     assert out == f.read()
 
     @pytest.mark.parametrize('target_name', sorted(SUPPORTED))
     def test_copy(self, target_name, tmpdir):
