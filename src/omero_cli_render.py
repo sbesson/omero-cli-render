@@ -428,7 +428,7 @@ class RenderControl(BaseControl):
             batch (int): The batch size
 
         Returns:
-            Generator: List of images (IObjects)
+            Generator: List of images (IObjects), context
         """
 
         if isinstance(object, list):
@@ -524,8 +524,9 @@ class RenderControl(BaseControl):
     @gateway_required
     def copy(self, args):
         """ Implements the 'copy' command """
-        for src_img in self.render_images(self.gateway, args.object, batch=1):
-            for targets in self.render_images(self.gateway, args.target):
+        for src_img, context in self.render_images(
+                self.gateway, args.object, batch=1):
+            for targets, c in self.render_images(self.gateway, args.target):
                 batch = dict()
                 for target in targets:
                     if target.id == src_img.id:
@@ -550,7 +551,7 @@ class RenderControl(BaseControl):
                     self._generate_thumbs(list(batch.values()))
 
     def update_channel_names(self, gateway, obj, namedict):
-        for targets in self.render_images(gateway, obj):
+        for targets, c in self.render_images(gateway, obj):
             iids = [img.id for img in targets]
             self._update_channel_names(self, iids, namedict)
 
@@ -656,7 +657,7 @@ class RenderControl(BaseControl):
             colourlist.append(c.color)
 
         iids = []
-        for img in self.render_images(self.gateway, args.object, batch=1):
+        for img, c in self.render_images(self.gateway, args.object, batch=1):
             iids.append(img.id)
 
             (def_z, def_t) = self._read_default_planes(
@@ -714,7 +715,7 @@ class RenderControl(BaseControl):
     def test(self, args):
         """ Implements the 'test' command """
         self.gateway.SERVICE_OPTS.setOmeroGroup('-1')
-        for img in self.render_images(self.gateway, args.object, batch=1):
+        for img, c in self.render_images(self.gateway, args.object, batch=1):
             self.test_per_pixel(
                 self.client, img.getPrimaryPixels().id, args.force, args.thumb)
 
