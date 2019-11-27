@@ -27,6 +27,7 @@ import sys
 import time
 import json
 import yaml
+import os
 
 from functools import wraps
 
@@ -381,6 +382,8 @@ class RenderControl(BaseControl):
         info.add_argument(
             "--style", choices=output_formats, default='plain',
             help="Output format")
+        info.add_argument(
+            "-f", action="store_true", help="Write render as file")
 
         copy.add_argument("target", type=render_type, help=tgt_help,
                           nargs="+")
@@ -430,13 +433,14 @@ class RenderControl(BaseControl):
 
         if isinstance(object, list):
             for x in object:
-                for rv in self.render_images(gateway, x, batch):
-                    yield rv
+                for rv, context in self.render_images(gateway, x, batch):
+                    yield rv, context
         elif isinstance(object, Screen):
             scr = self._lookup(gateway, "Screen", object.id)
             for plate in scr.listChildren():
-                for rv in self.render_images(gateway, plate._obj, batch):
-                    yield rv
+                for rv, context in self.render_images(
+                        gateway, plate._obj, batch):
+                    yield rv, scr.name + "/" + context
         elif isinstance(object, Plate):
             plt = self._lookup(gateway, "Plate", object.id)
             rv = []
@@ -444,64 +448,78 @@ class RenderControl(BaseControl):
                 for idx in range(0, well.countWellSample()):
                     img = well.getImage(idx)
                     if batch == 1:
-                        yield img
+                        yield img, plt.name + '/' + well.name
                     else:
                         rv.append(img)
                         if len(rv) == batch:
-                            yield rv
+                            yield rv, plt.name + '/' + well.name
                             rv = []
             if rv:
-                yield rv
+                yield rv, plt.name + '/' + well.name
 
         elif isinstance(object, Project):
             prj = self._lookup(gateway, "Project", object.id)
             for ds in prj.listChildren():
-                for rv in self.render_images(gateway, ds._obj, batch):
-                    yield rv
+                for rv, context in self.render_images(gateway, ds._obj, batch):
+                    yield rv, prj.name + "/" + context
 
         elif isinstance(object, Dataset):
             ds = self._lookup(gateway, "Dataset", object.id)
             rv = []
             for img in ds.listChildren():
                 if batch == 1:
-                    yield img
+                    yield img, ds.name
                 else:
                     rv.append(img)
                     if len(rv) == batch:
-                        yield rv
+                        yield rv, ds.name
                         rv = []
             if rv:
-                yield rv
+                yield rv, ds.name
 
         elif isinstance(object, Image):
             img = self._lookup(gateway, "Image", object.id)
             if batch == 1:
-                yield img
+                yield img, ""
             else:
-                yield [img]
+                yield [img], ""
         else:
             self.ctx.die(111, "TBD: %s" % object.__class__.__name__)
 
     @gateway_required
     def info(self, args):
         """ Implements the 'info' command """
+
         first = True
-        for img in self.render_images(self.gateway, args.object, batch=1):
+        for img, context in self.render_images(
+                self.gateway, args.object, batch=1):
             ro = RenderObject(img)
+
             if args.style == 'plain':
-                self.ctx.out(str(ro))
+                render_string = str(ro)
             elif args.style == 'yaml':
-                self.ctx.out(yaml.dump(ro.to_dict(), explicit_start=True,
-                             width=80, indent=4,
-                             default_flow_style=False).rstrip())
+                render_string = yaml.dump(
+                    ro.to_dict(), explicit_start=True,
+                    width=80, indent=4,
+                    default_flow_style=False).rstrip()
             else:
                 if not first:
                     self.ctx.die(
                         103,
                         "Output styles not supported for multiple images")
-                self.ctx.out(json.dumps(
-                    ro.to_dict(), sort_keys=True, indent=4))
+                render_string = json.dumps(
+                    ro.to_dict(), sort_keys=True, indent=4)
                 first = False
+
+            if not args.f:
+                self.ctx.out(render_string)
+            else:
+                if context is not "" and not os.path.exists(context):
+                    os.makedirs(context)
+                filename = "%s/%s.yml" % (context, img.name)
+                with open(filename, 'w') as f:
+                    f.write(render_string)
+                self.ctx.out("Saved as %s" % filename)
 
     @gateway_required
     def copy(self, args):
