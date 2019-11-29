@@ -393,10 +393,12 @@ class RenderControl(BaseControl):
                 "--disable", help="Disable non specified channels ",
                 action="store_true")
             x.add_argument(
+                "-f", action="store_true", help="Read rendering from disk")
+            x.add_argument(
                 "--ignore-errors", help="Do not error on mismatching"
                 " rendering settings", action="store_true")
             x.add_argument(
-                "channels",
+                "channels", nargs="*",
                 help="Local file or OriginalFile:ID which specifies the "
                      "rendering settings")
 
@@ -519,7 +521,8 @@ class RenderControl(BaseControl):
                 filename = "%s/%s.yml" % (context, img.name)
                 with open(filename, 'w') as f:
                     f.write(render_string)
-                self.ctx.out("Saved as %s" % filename)
+                    self.ctx.out("Saved rendering for image %s as %s" %
+                                 (img.id, filename))
 
     @gateway_required
     def copy(self, args):
@@ -661,17 +664,29 @@ class RenderControl(BaseControl):
     @gateway_required
     def set(self, args):
         """ Implements the 'set' command """
-        data = self._load_rendering_settings(
-            args.channels, session=self.client.getSession())
-        (namedict, cindices, rangelist, colourlist) = self._read_channels(
-            data)
-        greyscale = data.get('greyscale', None)
-        if greyscale is not None:
-            self.ctx.dbg('greyscale=%s' % greyscale)
+        if args.f is not True:
+            data = self._load_rendering_settings(
+                args.channels, session=self.client.getSession())
+            (namedict, cindices, rangelist, colourlist) = self._read_channels(
+                data)
+            greyscale = data.get('greyscale', None)
+            if greyscale is not None:
+                self.ctx.dbg('greyscale=%s' % greyscale)
 
         iids = []
         for img, c in self.render_images(self.gateway, args.object, batch=1):
             iids.append(img.id)
+
+            if args.f is True:
+                render_source = "%s/%s.yml" % (c, img.name)
+                self.ctx.dbg('Loading from %s' % render_source)
+                data = self._load_rendering_settings(render_source)
+                (namedict, cindices, rangelist, colourlist) = self._read_channels(
+                    data)
+                greyscale = data.get('greyscale', None)
+                if greyscale is not None:
+                    self.ctx.dbg('greyscale=%s' % greyscale)
+
 
             (def_z, def_t) = self._read_default_planes(
                 img, data, ignore_errors=args.ignore_errors)
@@ -715,11 +730,14 @@ class RenderControl(BaseControl):
             finally:
                 img._closeRE()
 
+            if namedict and args.f is True:
+                self._update_channel_names(self.gateway, [img.id], namedict)
+
         if not iids:
             self.ctx.die(113, "ERROR: No images found for %s %d" %
                          (args.object.__class__.__name__, args.object.id._val))
 
-        if namedict:
+        if namedict and args.f is not True:
             self._update_channel_names(self.gateway, iids, namedict)
 
     def edit(self, args):
