@@ -133,18 +133,22 @@ class TestRender(CLITest):
         # Define channels with labels and colors
         channels = {}
         channels[1] = {
+            'active': True,
             'label': self.uuid(),
             'color': '123456',
         }
         channels[2] = {
+            'active': True,
             'label': self.uuid(),
             'color': '789ABC',
         }
         channels[3] = {
+            'active': True,
             'label': self.uuid(),
             'color': 'DEF012',
         }
         channels[4] = {
+            'active': False,
             'label': self.uuid(),
             'color': '345678',
         }
@@ -208,6 +212,7 @@ class TestRender(CLITest):
                 assert img.getDefaultZ() == (int)(old_div(img.getSizeZ(), 2))
 
     def assert_channel_rdef(self, channel, rdef, version=2):
+        assert channel.isActive() == rdef.get('active', True)
         assert channel.getLabel() == rdef['label']
         assert channel.getColor().getHtml() == rdef['color']
         start = 'start' if version > 1 else 'min'
