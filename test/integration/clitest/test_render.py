@@ -354,3 +354,23 @@ class TestRender(CLITest):
         self.args += ["--ignore-errors"]
         self.cli.invoke(self.args, strict=True)
         self.assert_target_rdef(self.idonly, rd)
+
+    @pytest.mark.parametrize('disable', [True, False])
+    def test_set_partial(self, tmpdir, disable):
+        self.create_image(sizec=4)
+        rd = self.get_render_def(sizec=1)
+        rdfile = tmpdir.join('set-partiaL.json')
+        rdfile.write(json.dumps(rd))
+        self.args += ["set", self.idonly, str(rdfile)]
+        if disable:
+            self.args += ["--disable"]
+        self.cli.invoke(self.args, strict=True)
+        if disable:
+            rd['channels'][2]={'active': False}
+            rd['channels'][3]={'active': False}
+            rd['channels'][4]={'active': False}
+        else:
+            rd['channels'][2]={'active': True}
+            rd['channels'][3]={'active': True}
+            rd['channels'][4]={'active': False}
+        self.assert_target_rdef(self.idonly, rd)
